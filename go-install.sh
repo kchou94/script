@@ -1,17 +1,44 @@
 #!/bin/bash
 
+# useage: ./go-install.sh 1.17
+
 # https://golang.org/dl
 
-GOVERSION=go1.17
-GOFILE=${GOVERSION}.linux-amd64.tar.gz
+case "$(uname -s)" in
+  Darwin)
+    SYSTEM=darwin
+    ;;
+  Linux)
+    SYSTEM=linux
+    ;;
+  *)
+    error "Unexpected system"
+    ;;
+esac
 
-wget https://golang.org/dl/${GOFILE} -O /tmp/${GOFILE}
+case "$(uname -m)" in
+  x86_64)
+    HARDWARE=amd64
+    ;;
+  arm64)
+    HARDWARE=arm64
+    ;;
+  *)
+    error "Unexpected hardware"
+    ;;
+esac
+
+GOVERSION=go"$1"
+GOFILE=${GOVERSION}.${SYSTEM}-${HARDWARE}.tar.gz
+
+wget https://golang.org/dl/"${GOFILE}" -O /tmp/"${GOFILE}"
 mkdir -p "$HOME"/go
-tar -xf /tmp/${GOFILE} -C "$HOME"/go
+tar -xf /tmp/"${GOFILE}" -C "$HOME"/go
 
-mv "$HOME"/go/go "$HOME"/go/${GOVERSION}
+mv "$HOME"/go/go "$HOME"/go/"${GOVERSION}"
 
-tee -a $HOME/.bashrc << 'EOF'
+tee -a "$HOME"/.zshrc << 'EOF'
+
 # Go envs
 export GOVERSION=${GOVERSION} # Go 版本设置
 export GO_INSTALL_DIR=$HOME/go # Go 安装目录
